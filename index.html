@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Boba Sniper</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%226%22 fill=%22%237C3AED%22/><text x=%2212%22 y=%2217%22 font-size=%2214%22 text-anchor=%22middle%22>🧋</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --purple:#7C3AED; --purple-dark:#4C1D95; --purple-light:#C4A8E8;
+  --cream:#FAF6EF; --cream-2:#F0E9FA; --ink:#241B2F; --muted:#8a7a9d;
+  --gold:#E8A94B; --green:#10b981; --amber:#f59e0b; --red:#f43f5e;
+  --card-shadow:0 2px 16px -6px rgba(76,29,149,.18);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:'Manrope',system-ui,sans-serif; background:#EFE7F5; display:flex; align-items:center; justify-content:center; min-height:100vh;}
+.font-display{font-family:'Baloo 2',system-ui,sans-serif;}
+button{font-family:inherit; cursor:pointer; background:none; border:none;}
+input{font-family:inherit;}
+::-webkit-scrollbar{display:none;}
+
+/* ---------- phone frame ---------- */
+#phone{
+  position:relative; width:390px; height:844px; max-height:100vh;
+  border-radius:2.7rem; overflow:hidden; box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  border:6px solid #1f1730; background:var(--cream); color:var(--ink);
+  transition:background .25s, color .25s;
+}
+body.dark #phone{ background:#16101F; color:#F3ECFA; border-color:#241B33; }
+
+.screen{ position:absolute; inset:0; overflow-y:auto; padding-bottom:96px; display:none; }
+.screen.active{ display:block; }
+
+/* ---------- header ---------- */
+.topbar{ display:flex; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top) + 18px) 20px 8px; }
+.brand{ display:flex; align-items:center; gap:8px; }
+.brand-icon{ width:36px; height:36px; border-radius:12px; background:linear-gradient(135deg,var(--purple),var(--purple-dark)); display:flex; align-items:center; justify-content:center; position:relative; font-size:16px; }
+.brand-icon .target{ position:absolute; bottom:-3px; right:-3px; font-size:11px; }
+.brand h1{ font-size:22px; font-weight:800; letter-spacing:-.02em; }
+.iconbtn{ padding:8px; border-radius:999px; transition:transform .15s; }
+.iconbtn:active{ transform:scale(.9); }
+
+.screen-header{ display:flex; align-items:center; gap:8px; padding:calc(env(safe-area-inset-top) + 16px) 20px 12px; font-weight:800; font-size:19px; }
+.screen-header button{ padding:6px; margin-left:-6px; border-radius:999px; }
+
+/* ---------- search bar ---------- */
+.searchbar{ display:flex; align-items:center; gap:10px; background:#fff; border-radius:18px; padding:0 16px; height:56px; box-shadow:0 6px 24px -8px rgba(76,29,149,.35); border:1px solid #f0e9fa; }
+.searchbar.small{ height:44px; border-radius:16px; padding:0 14px; }
+body.dark .searchbar{ background:#241B33; border-color:#33284a; }
+.searchbar input{ flex:1; border:none; outline:none; background:transparent; font-size:15px; font-weight:500; color:inherit; }
+.searchbar input::placeholder{ color:#b6a9cc; }
+.searchbar svg{ flex-shrink:0; color:var(--purple); }
+
+/* ---------- chips ---------- */
+.chiprow{ display:flex; gap:8px; overflow-x:auto; padding:10px 20px; }
+.chip{ flex-shrink:0; padding:9px 14px; border-radius:999px; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid #ECE3F6; background:#fff; color:#5b4a75; transition:all .2s; display:flex; align-items:center; gap:5px;}
+.chip.active{ background:var(--purple-dark); color:#fff; border-color:var(--purple-dark); box-shadow:0 4px 14px -4px rgba(76,29,149,.6); transform:scale(1.03); }
+body.dark .chip{ background:#241B33; border-color:#33284a; color:#c9bbe0; }
+
+/* ---------- cards ---------- */
+.shopcard{ width:100%; text-align:left; background:#fff; border-radius:22px; padding:12px; display:flex; gap:12px; box-shadow:var(--card-shadow); transition:transform .15s; animation:rise .4s cubic-bezier(.2,.8,.2,1) both; }
+.shopcard:active{ transform:scale(.98); }
+body.dark .shopcard{ background:#241B33; }
+.thumb{ width:80px; height:80px; border-radius:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:30px; position:relative; overflow:hidden; }
+.thumb.lg{ width:100%; height:150px; font-size:44px; border-radius:18px; }
+.thumb.sm{ width:60px; height:60px; font-size:22px; }
+.thumb::after{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.35) 0, transparent 40%); }
+.shopcard-body{ flex:1; min-width:0; }
+.shopcard-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:6px; }
+.shopcard-top h3{ font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.heart-btn{ padding:4px; border-radius:999px; flex-shrink:0; transition:transform .15s; }
+.heart-btn:active{ transform:scale(.85); }
+.rating{ display:flex; align-items:center; gap:4px; font-size:13px; font-weight:700; color:#3a2a52; }
+body.dark .rating{ color:#e6ddf5; }
+.addr{ font-size:12.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.metarow{ display:flex; align-items:center; justify-content:space-between; margin-top:6px; }
+.metaleft{ display:flex; gap:10px; font-size:12px; font-weight:600; color:#5b4a75; }
+body.dark .metaleft{ color:#c9bbe0; }
+.metaleft span{ display:flex; align-items:center; gap:3px; }
+.status-pill{ display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; }
+.status-open{ background:rgba(16,185,129,.15); color:#059669; }
+.status-closing{ background:rgba(245,158,11,.15); color:#b45309; }
+.status-closed{ background:rgba(244,63,94,.15); color:#e11d48; }
+.status-dot{ width:6px; height:6px; border-radius:999px; }
+
+/* ---------- section titles ---------- */
+.sectitle{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; color:#5b4a75; padding:0 20px; margin-bottom:8px; }
+body.dark .sectitle{ color:#c9bbe0; }
+.hscroll{ display:flex; gap:12px; overflow-x:auto; padding:0 20px 6px; }
+.hscroll-item{ width:150px; flex-shrink:0; text-align:left; }
+.hscroll-item p{ font-size:13px; font-weight:800; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* ---------- brand spotlight ---------- */
+.brandcard{ background:#fff; border-radius:22px; padding:14px; box-shadow:var(--card-shadow); display:flex; gap:12px; }
+body.dark .brandcard{ background:#241B33; }
+.brandcard .thumb{ width:56px; height:56px; font-size:24px; border-radius:14px; }
+.brandcard h4{ font-size:15px; font-weight:800; }
+.brandcard .facts{ font-size:12px; color:var(--muted); margin-top:3px; line-height:1.5; }
+.brandcard .sig{ display:inline-block; margin-top:6px; font-size:11.5px; font-weight:700; background:var(--cream-2); color:#5b4a75; padding:3px 10px; border-radius:999px; }
+body.dark .brandcard .sig{ background:rgba(255,255,255,.08); color:#e6ddf5; }
+.find-real-btn{ margin-top:8px; font-size:12px; font-weight:700; color:var(--purple); display:inline-flex; align-items:center; gap:3px; }
+
+/* ---------- banner / notice ---------- */
+.notice{ margin:0 20px 14px; padding:12px 14px; border-radius:16px; background:linear-gradient(120deg,#7C3AED,#4C1D95); color:#fff; font-size:12.5px; font-weight:600; line-height:1.5; display:flex; gap:10px; align-items:flex-start; }
+.notice a, .notice button.link{ color:#fff; text-decoration:underline; font-weight:800; }
+.notice.warn{ background:linear-gradient(120deg,#E8A94B,#B45309); }
+
+/* ---------- tabs (list/map) ---------- */
+.tabtoggle{ display:flex; border-radius:999px; padding:4px; background:var(--cream-2); }
+body.dark .tabtoggle{ background:rgba(255,255,255,.06); }
+.tabtoggle button{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:999px; font-size:12.5px; font-weight:800; color:#8a7a9d; }
+.tabtoggle button.active{ background:#fff; color:var(--purple-dark); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+body.dark .tabtoggle button.active{ background:#3a2d55; color:#e6ddf5; }
+
+/* ---------- bottom nav ---------- */
+#tabbar{ position:absolute; bottom:0; left:0; right:0; display:flex; align-items:center; justify-content:space-around; padding:8px 12px calc(env(safe-area-inset-bottom) + 10px); background:rgba(255,255,255,.92); backdrop-filter:blur(16px); border-top:1px solid #f0e9fa; z-index:30; }
+body.dark #tabbar{ background:rgba(26,20,36,.92); border-color:rgba(255,255,255,.06); }
+.tabbtn{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 12px; position:relative; color:#b6a9cc; }
+.tabbtn.active{ color:var(--purple); }
+.tabbtn.active::before{ content:''; position:absolute; top:-8px; width:5px; height:5px; border-radius:999px; background:var(--purple); }
+.tabbtn span{ font-size:10.5px; font-weight:700; }
+
+/* ---------- FAB ---------- */
+#fab{ position:absolute; right:20px; bottom:96px; width:56px; height:56px; border-radius:999px; background:linear-gradient(135deg,var(--purple),var(--purple-dark)); box-shadow:0 10px 30px -6px rgba(76,29,149,.7); display:flex; align-items:center; justify-content:center; z-index:20; transition:transform .15s; }
+#fab:active{ transform:scale(.9); }
+
+/* ---------- toast ---------- */
+#toast{ position:absolute; bottom:96px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; font-size:12.5px; font-weight:700; padding:10px 16px; border-radius:999px; z-index:60; display:none; align-items:center; gap:6px; box-shadow:0 10px 24px rgba(0,0,0,.3); }
+
+/* ---------- lock-on overlay ---------- */
+#snipe-overlay{ position:absolute; inset:0; background:rgba(22,16,31,.85); backdrop-filter:blur(4px); z-index:80; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+#snipe-overlay .ring{ font-size:70px; animation:spin 1.4s linear infinite; }
+#snipe-overlay p{ color:#fff; font-weight:800; font-size:15px; }
+
+/* ---------- detail screen ---------- */
+#detail-screen{ position:absolute; inset:0; z-index:40; overflow-y:auto; background:var(--cream); display:none; padding-bottom:40px; animation:sheetUp .32s cubic-bezier(.16,1,.3,1) both; }
+body.dark #detail-screen{ background:#16101F; color:#F3ECFA; }
+.detail-banner{ position:relative; height:220px; display:flex; align-items:flex-end; padding:18px; overflow:hidden; }
+.detail-banner .emoji-bg{ position:absolute; right:-10px; bottom:-20px; font-size:180px; opacity:.18; }
+.detail-banner .back, .detail-banner .share{ position:absolute; top:calc(env(safe-area-inset-top) + 14px); width:36px; height:36px; border-radius:999px; background:rgba(0,0,0,.28); display:flex; align-items:center; justify-content:center; }
+.detail-banner .back{ left:20px; } .detail-banner .share{ right:20px; }
+.detail-banner h1{ color:#fff; font-size:24px; font-weight:800; text-shadow:0 2px 8px rgba(0,0,0,.25); }
+.detail-banner .sub{ display:flex; align-items:center; gap:8px; margin-top:4px; color:#fff; font-weight:700; font-size:13.5px; }
+.detail-card{ margin:-16px 20px 0; background:#fff; border-radius:22px; padding:16px; box-shadow:0 10px 30px -10px rgba(0,0,0,.15); display:flex; flex-direction:column; gap:10px; position:relative; z-index:5; font-size:13px; font-weight:600; }
+body.dark .detail-card{ background:#241B33; }
+.detail-card .row{ display:flex; align-items:center; gap:8px; }
+.detail-card .row svg{ color:var(--purple); flex-shrink:0; }
+.actions{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:16px 20px 0; }
+.actionbtn{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.actionbtn .ic{ width:48px; height:48px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:var(--cream-2); }
+body.dark .actionbtn .ic{ background:rgba(255,255,255,.08); }
+.actionbtn .ic.filled{ background:linear-gradient(135deg,var(--purple),var(--purple-dark)); }
+.actionbtn span{ font-size:10.5px; font-weight:700; color:#5b4a75; }
+body.dark .actionbtn span{ color:#c9bbe0; }
+.detail-section{ padding:20px 20px 0; }
+.tagpills{ display:flex; flex-wrap:wrap; gap:8px; }
+.tagpill{ padding:7px 13px; border-radius:999px; background:var(--cream-2); color:#5b4a75; font-size:12.5px; font-weight:700; }
+body.dark .tagpill{ background:rgba(255,255,255,.08); color:#e6ddf5; }
+.review{ background:#fff; border-radius:18px; padding:13px; margin-bottom:10px; }
+body.dark .review{ background:rgba(255,255,255,.05); }
+.review-top{ display:flex; justify-content:space-between; font-weight:800; font-size:13px; }
+.review p{ font-size:12.5px; color:#5b4a75; margin-top:5px; line-height:1.5; }
+body.dark .review p{ color:#c9bbe0; }
+
+/* ---------- settings ---------- */
+.settings-group{ padding:0 20px; margin-bottom:18px; }
+.settings-group h3{ font-size:12px; font-weight:800; text-transform:uppercase; color:#8a7a9d; margin-bottom:8px; }
+.settings-box{ background:#fff; border-radius:18px; overflow:hidden; }
+body.dark .settings-box{ background:#241B33; }
+.settings-row{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #f5eefc; }
+body.dark .settings-row{ border-color:rgba(255,255,255,.05); }
+.settings-row:last-child{ border-bottom:none; }
+.settings-row .left{ display:flex; align-items:center; gap:12px; font-size:13.5px; font-weight:700; }
+.settings-row .ic{ width:32px; height:32px; border-radius:10px; background:var(--cream-2); display:flex; align-items:center; justify-content:center; }
+body.dark .settings-row .ic{ background:rgba(255,255,255,.08); }
+.switch{ width:44px; height:26px; border-radius:999px; background:#e3d6f5; padding:3px; transition:background .2s; }
+.switch.on{ background:var(--purple); }
+.switch .knob{ width:20px; height:20px; border-radius:999px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s; }
+.switch.on .knob{ transform:translateX(18px); }
+.keyinput{ width:100%; border:1px solid #ECE3F6; border-radius:14px; padding:12px 14px; font-size:13px; font-weight:600; outline:none; background:#fff; color:inherit; }
+body.dark .keyinput{ background:#1a1424; border-color:#33284a; }
+.savebtn{ margin-top:10px; width:100%; padding:12px; border-radius:14px; background:var(--purple); color:#fff; font-weight:800; font-size:13.5px; }
+.unit-toggle{ display:flex; border-radius:999px; padding:2px; background:var(--cream-2); }
+body.dark .unit-toggle{ background:rgba(255,255,255,.08); }
+.unit-toggle button{ padding:5px 12px; border-radius:999px; font-size:12px; font-weight:800; color:#8a7a9d; }
+.unit-toggle button.active{ background:var(--purple); color:#fff; }
+
+/* ---------- map view ---------- */
+#map-panel{ position:relative; flex:1; min-height:400px; }
+#gmap{ position:absolute; inset:0; }
+.map-fallback{ position:absolute; inset:0; background:repeating-radial-gradient(circle at 30% 20%, #e4d7f7 0 1px, transparent 1px 18px); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; text-align:center; padding:30px; color:#8a7a9d; font-size:13px; font-weight:600; }
+body.dark .map-fallback{ background-color:#1d1730; color:#a996c4;}
+.map-preview{ position:absolute; left:12px; right:12px; bottom:12px; z-index:10; }
+
+/* ---------- empty state ---------- */
+.empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:10px; padding:60px 30px; color:#8a7a9d; font-size:13.5px; font-weight:600; }
+.primary-btn{ margin-top:6px; padding:10px 18px; border-radius:999px; background:var(--purple); color:#fff; font-weight:800; font-size:13px; }
+
+/* ---------- animations ---------- */
+@keyframes rise{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+@keyframes sheetUp{ from{transform:translateY(100%);} to{transform:translateY(0);} }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@keyframes pulse{ 0%{transform:scale(.6); opacity:.7;} 100%{transform:scale(2.6); opacity:0;} }
+.pulse-dot{ position:relative; width:16px; height:16px; }
+.pulse-dot::before{ content:''; position:absolute; inset:0; border-radius:999px; background:rgba(124,58,237,.4); animation:pulse 2.2s infinite; }
+.pulse-dot::after{ content:''; position:absolute; inset:2px; border-radius:999px; background:var(--purple); border:2px solid #fff; }
+@media (prefers-reduced-motion: reduce){ *{ animation:none !important; } }
+</style>
+</head>
+<body>
+
+<div id="phone">
+
+  <!-- ============ HOME ============ -->
+  <div class="screen active" id="screen-home">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-icon">🧋<span class="target">🎯</span></div>
+        <h1 class="font-display">Boba Sniper</h1>
+      </div>
+      <button class="iconbtn" onclick="toggleDark()" id="darkbtn">🌙</button>
+    </div>
+    <div style="padding:0 20px;">
+      <div class="searchbar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="4" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="20"/><line x1="4" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="20" y2="12"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+        <input id="home-search" placeholder="Search for a city, address, or boba shop…" onfocus="setSearchActive(true)" onkeydown="if(event.key==='Enter') runSearch(this.value)"/>
+      </div>
+    </div>
+
+    <div id="home-focus" style="display:none; padding:18px 0 0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0 20px; margin-bottom:8px;">
+        <h3 style="font-size:13px; font-weight:800; color:#5b4a75;">Recent searches</h3>
+        <button onclick="setSearchActive(false)" style="font-size:12px; font-weight:800; color:var(--purple);">Cancel</button>
+      </div>
+      <div id="recent-chips" class="chiprow" style="padding-top:0;"></div>
+      <button class="primary-btn" style="margin:6px 20px 16px; display:block;" onclick="useMyLocation()">📍 Use my current location</button>
+      <div class="sectitle">Popular boba brands</div>
+      <div id="home-brand-list" style="display:flex; flex-direction:column; gap:10px; padding:0 20px;"></div>
+    </div>
+
+    <div id="home-default">
+      <div class="notice" id="home-notice"></div>
+
+      <div style="padding:0 20px;">
+        <div class="sectitle" style="padding:0; margin-bottom:8px;">✨ Boba of the Day</div>
+        <button class="brandcard" style="width:100%;" id="boba-of-day" onclick=""></button>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="sectitle">🎯 Real boba chains, real facts</div>
+        <div class="hscroll" id="trending-scroll"></div>
+      </div>
+
+      <div style="margin-top:20px; margin-bottom:10px;">
+        <div class="sectitle">📚 About these brands</div>
+        <div style="display:flex; flex-direction:column; gap:10px; padding:0 20px;" id="brand-facts-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DISCOVER ============ -->
+  <div class="screen" id="screen-discover">
+    <div style="padding:calc(env(safe-area-inset-top) + 16px) 20px 0;">
+      <div class="searchbar small">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="4" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="20"/><line x1="4" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="20" y2="12"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+        <input id="discover-search" placeholder="Search for a city, address, or boba shop…" onkeydown="if(event.key==='Enter') runSearch(this.value)"/>
+      </div>
+    </div>
+    <div style="padding:10px 20px 0;">
+      <div class="tabtoggle">
+        <button id="tt-list" class="active" onclick="setDiscoverView('list')">☰ List</button>
+        <button id="tt-map" onclick="setDiscoverView('map')">🗺 Map</button>
+      </div>
+    </div>
+    <div class="chiprow" id="filter-chips"></div>
+    <div id="discover-body"></div>
+  </div>
+
+  <!-- ============ FAVORITES ============ -->
+  <div class="screen" id="screen-favorites">
+    <div class="screen-header">Favorites</div>
+    <div style="padding:0 20px; display:flex; flex-direction:column; gap:10px;" id="favorites-list"></div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div class="screen" id="screen-settings">
+    <div class="screen-header">Settings</div>
+
+    <div class="settings-group">
+      <h3>Real-time data</h3>
+      <div class="settings-box" style="padding:14px 16px;">
+        <p style="font-size:12.5px; font-weight:600; color:#8a7a9d; line-height:1.6; margin-bottom:10px;">
+          Paste a Google Maps/Places API key to search real, live boba shops — real ratings, hours, phone numbers, photos, and reviews. Enable the <b>Maps JavaScript API</b> and <b>Places API</b> for the key in Google Cloud Console. Your key is stored only in this browser (localStorage), never sent anywhere else.
+        </p>
+        <input class="keyinput" id="api-key-input" placeholder="AIza..." />
+        <button class="savebtn" onclick="saveApiKey()">Save & Connect</button>
+        <p id="api-status" style="font-size:12px; font-weight:700; margin-top:8px;"></p>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Appearance</h3>
+      <div class="settings-box">
+        <div class="settings-row">
+          <div class="left"><span class="ic">☀️</span>Light Mode</div>
+          <div class="switch" id="sw-light" onclick="setDark(false)"><div class="knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div class="left"><span class="ic">🌙</span>Dark Mode</div>
+          <div class="switch" id="sw-dark" onclick="setDark(true)"><div class="knob"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Location & Units</h3>
+      <div class="settings-box">
+        <div class="settings-row">
+          <div class="left"><span class="ic">📍</span>Location Access</div>
+          <button class="primary-btn" style="margin:0; padding:6px 12px; font-size:11.5px;" onclick="requestLocationPermission()">Request</button>
+        </div>
+        <div class="settings-row">
+          <div class="left"><span class="ic">📏</span>Units</div>
+          <div class="unit-toggle">
+            <button id="unit-mi" class="active" onclick="setUnits('mi')">Miles</button>
+            <button id="unit-km" onclick="setUnits('km')">Km</button>
+          </div>
+        </div>
+      </div>
+      <p id="loc-status" style="font-size:11.5px; font-weight:600; color:#8a7a9d; margin-top:6px; padding-left:2px;"></p>
+    </div>
+
+    <div class="settings-group">
+      <h3>Notifications</h3>
+      <div class="settings-box">
+        <div class="settings-row">
+          <div class="left"><span class="ic">🔔</span>New shops nearby</div>
+          <div class="switch" id="sw-notif" onclick="toggleNotifications()"><div class="knob"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center; font-size:11.5px; font-weight:600; color:#c9bbe0; margin-top:8px;">Boba Sniper v1.0 — target acquired 🎯</p>
+  </div>
+
+  <!-- ============ SHOP DETAIL ============ -->
+  <div id="detail-screen"></div>
+
+  <!-- FAB -->
+  <button id="fab" onclick="fireRandomBoba()">🔀</button>
+
+  <!-- Lock-on overlay -->
+  <div id="snipe-overlay">
+    <div class="ring">🎯</div>
+    <p>Locking onto target…</p>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Tab bar -->
+  <div id="tabbar">
+    <button class="tabbtn active" data-tab="home" onclick="setTab('home')">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="tabbtn" data-tab="discover" onclick="setTab('discover')">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      <span>Discover</span>
+    </button>
+    <button class="tabbtn" data-tab="favorites" onclick="setTab('favorites')">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6z"/></svg>
+      <span>Favorites</span>
+    </button>
+    <button class="tabbtn" data-tab="settings" onclick="setTab('settings')">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   BOBA SNIPER — vanilla JS app
+   Real facts about real boba chains (verified via web search), plus a real,
+   optional Google Maps/Places integration for live nearby results.
+   ========================================================================= */
+
+/* ---------------- Real, verified brand facts ---------------- */
+const BRANDS = [
+  { id:'bobaguys', name:'Boba Guys', emoji:'🧋', gradient:['#7C3AED','#4C1D95'],
+    founded:'Founded in 2011 in San Francisco by Andrew Chau and Bin Chen.',
+    facts:'Uses organic milk from Straus Family Creamery and homebrewed heirloom tea from Five Mountains. Grew from a single SF stand into shops across the Bay Area, LA, and NYC.',
+    signature:'Strawberry Matcha Latte · Hong Kong Milk Tea', tags:['Milk Tea','Coffee'] },
+  { id:'gongcha', name:'Gong Cha', emoji:'🍵', gradient:['#C084FC','#7C3AED'],
+    founded:'Founded in 2006 in Kaohsiung, Taiwan (roots trace to a 1996 tea shop).',
+    facts:'One of the world\\'s largest bubble tea franchises, with locations across dozens of countries. Known for letting customers fully customize sweetness and toppings.',
+    signature:'Milk Foam Green Tea', tags:['Milk Tea','Fruit Tea'] },
+  { id:'sharetea', name:'Sharetea', emoji:'🥤', gradient:['#E8A94B','#B5651D'],
+    founded:'Founded in 1992 in Taipei, Taiwan by Cheng Kai-Lung.', 
+    facts:'One of the earliest bubble tea brands still operating today, with 500+ stores across 15 countries built on whole tea leaves and natural ingredients.',
+    signature:'Classic Pearl Milk Tea', tags:['Milk Tea','Fruit Tea'] },
+  { id:'kungfutea', name:'Kung Fu Tea', emoji:'🥋', gradient:['#F472B6','#9D174D'],
+    founded:'Founded in 2010 in Queens, New York City.',
+    facts:'Grew into one of the largest bubble tea chains in the U.S. Follows a "30-minute rule," brewing fresh tea every half hour, and started National Bubble Tea Day (April 30).',
+    signature:'Kung Fu Milk Tea Cap', tags:['Milk Tea','Coffee'] },
+  { id:'coco', name:'CoCo Fresh Tea & Juice', emoji:'🧃', gradient:['#34D399','#065F46'],
+    founded:'Founded in 1997 in Tamsui, Taiwan by Hung Chao-shui.',
+    facts:'Grown to more than 4,500 locations worldwide, one of the largest bubble tea franchises on the planet, spanning teas, juices, and smoothies.',
+    signature:'Mango Yakult', tags:['Fruit Tea','Smoothies'] },
+  { id:'tigersugar', name:'Tiger Sugar', emoji:'🐯', gradient:['#FBBF24','#B45309'],
+    founded:'Founded in 2017 in Taichung, Taiwan.',
+    facts:'Famous for its "tiger-striped" cups and a proprietary 8-hour method for cooking brown sugar syrup and tapioca pearls. Became a cult brand almost overnight.',
+    signature:'Brown Sugar Boba Milk with Cream Mustache', tags:['Milk Tea'] },
+  { id:'chatime', name:'Chatime', emoji:'☕', gradient:['#60A5FA','#1E3A8A'],
+    founded:'Founded in 2005 in Taiwan; expanded to Australia in 2009.',
+    facts:'Now operates more than 2,500 locations across 38 countries, one of the most widely traveled bubble tea brands in the world.',
+    signature:'QQ Pearl Milk Tea', tags:['Milk Tea','Fruit Tea'] },
+  { id:'thealley', name:'The Alley', emoji:'🦌', gradient:['#A78BFA','#5B21B6'],
+    founded:'Founded in 2015 in Taiwan by graphic designer Mao-ting Chiu.',
+    facts:'Recognizable by its deer-antler logo. Uses handcrafted "Deerioca" pearls made with naturally boiled sugar cane in place of artificial sweeteners.',
+    signature:'Brown Sugar Deerioca Fresh Milk', tags:['Milk Tea'] },
+  { id:'happylemon', name:'Happy Lemon', emoji:'🍋', gradient:['#FDE68A','#CA8A04'],
+    founded:'Founded in 2006 in Shanghai, China.',
+    facts:'One of the earliest chains to popularize the salted cheese-foam topping now common across the bubble tea industry.',
+    signature:'Cheese Foam Series', tags:['Cheese Foam','Fruit Tea'] },
+];
+
+/* ---------------- App state ---------------- */
+let state = {
+  tab:'home', dark:false, units: localStorage.getItem('bs_units') || 'mi',
+  searchActive:false, discoverView:'list', results:null, resultQuery:'',
+  favorites:JSON.parse(localStorage.getItem('bs_favorites')||'{}'),
+  recent:JSON.parse(localStorage.getItem('bs_recent')||'["Austin, TX","Boba Guys","Downtown Seattle"]'),
+  apiKey: localStorage.getItem('bs_gmaps_key') || '',
+  userLoc:null, activeMarkerId:null, detailPlace:null,
+  filters:{ openNow:false, premium:false, sort:'default', keyword:'' }
+};
+state.dark = localStorage.getItem('bs_dark') === '1';
+
+let gmapsReady=false, map=null, placesService=null, geocoder=null, markers=[], userMarker=null;
+
+/* ---------------- helpers ---------------- */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='flex';
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>t.style.display='none',1900);
+}
+function haversine(a,b){
+  const R=3958.8, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat), dLng=toRad(b.lng-a.lng);
+  const x=Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function fmtDist(mi){ return state.units==='km' ? (mi*1.60934).toFixed(1)+' km' : mi.toFixed(1)+' mi'; }
+function priceStr(level){ return level ? '$'.repeat(level) : '$$'; }
+function statusFromOpeningHours(place){
+  if(place.opening_hours && typeof place.opening_hours.isOpen === 'function'){
+    try{
+      const open = place.opening_hours.isOpen();
+      if(open === undefined) return 'unknown';
+      return open ? 'open' : 'closed';
+    }catch(e){ return 'unknown'; }
+  }
+  if(place.opening_hours && typeof place.opening_hours.open_now === 'boolean'){
+    return place.opening_hours.open_now ? 'open' : 'closed';
+  }
+  return 'unknown';
+}
+function statusPillHtml(status){
+  const map = { open:['status-open','#059669','Open'], closing:['status-closing','#b45309','Closing Soon'],
+    closed:['status-closed','#e11d48','Closed'], unknown:['status-closed','#8a7a9d','Hours unknown'] };
+  const [cls,color,label] = map[status] || map.unknown;
+  return `<span class="status-pill ${cls}"><span class="status-dot" style="background:${color}"></span>${label}</span>`;
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------------- tabs / nav ---------------- */
+function setTab(tab){
+  state.tab = tab;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('detail-screen').style.display='none';
+  document.getElementById('fab').style.display='flex';
+  document.getElementById('tabbar').style.display='flex';
+  if(tab==='favorites') renderFavorites();
+  if(tab==='discover' && state.discoverView==='map') setTimeout(initOrResizeMap, 50);
+}
+function setSearchActive(v){
+  state.searchActive=v;
+  document.getElementById('home-focus').style.display = v ? 'block':'none';
+  document.getElementById('home-default').style.display = v ? 'none':'block';
+  if(v) renderHomeFocus();
+}
+
+/* ---------------- rendering: home ---------------- */
+function renderHomeNotice(){
+  const el=document.getElementById('home-notice');
+  if(state.apiKey){
+    el.className='notice';
+    el.innerHTML = `🎯 <div>Live mode connected — search any city or address for real, up-to-the-minute boba shops.</div>`;
+  } else {
+    el.className='notice warn';
+    el.innerHTML = `🔑 <div>Running in offline mode with real boba-chain facts. Add a free Google Maps/Places API key in <button class="link" onclick="setTab('settings')">Settings</button> to search real, live nearby shops.</div>`;
+  }
+}
+function shopThumbHtml(emoji, gradient, size=''){
+  return `<div class="thumb ${size}" style="background:linear-gradient(135deg,${gradient[0]},${gradient[1]})">${emoji}</div>`;
+}
+function brandCardHtml(b){
+  return `
+  <div class="brandcard">
+    ${shopThumbHtml(b.emoji,b.gradient)}
+    <div style="flex:1;">
+      <h4>${b.name}</h4>
+      <div class="facts"><b>${b.founded}</b><br/>${b.facts}</div>
+      <span class="sig">🧋 ${b.signature}</span><br/>
+      <button class="find-real-btn" onclick="findRealLocations('${b.name.replace(/'/g,"\\'")}')">📍 Find real ${b.name} shops near you →</button>
+    </div>
+  </div>`;
+}
+function renderHome(){
+  renderHomeNotice();
+  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+  const bod = BRANDS[doy % BRANDS.length];
+  const bodEl = document.getElementById('boba-of-day');
+  bodEl.setAttribute('onclick', `findRealLocations('${bod.name.replace(/'/g,"\\'")}')`);
+  bodEl.innerHTML = `${shopThumbHtml(bod.emoji,bod.gradient)}
+    <div style="flex:1; text-align:left;">
+      <p style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--gold);">Today's pick</p>
+      <h4>${bod.name}</h4>
+      <div class="facts">${bod.signature}</div>
+    </div>`;
+
+  document.getElementById('trending-scroll').innerHTML = BRANDS.map(b=>`
+    <button class="hscroll-item" onclick="findRealLocations('${b.name.replace(/'/g,"\\'")}')">
+      ${shopThumbHtml(b.emoji,b.gradient,'lg')}
+      <p>${b.name}</p>
+      <div class="facts" style="margin-top:2px;">${b.signature}</div>
+    </button>`).join('');
+
+  document.getElementById('brand-facts-list').innerHTML = BRANDS.map(brandCardHtml).join('');
+}
+function renderHomeFocus(){
+  document.getElementById('recent-chips').innerHTML = state.recent.map(r=>
+    `<button class="chip" onclick="document.getElementById('home-search').value='${r.replace(/'/g,"\\'")}'; runSearch('${r.replace(/'/g,"\\'")}')">${r}</button>`
+  ).join('');
+  document.getElementById('home-brand-list').innerHTML = BRANDS.slice(0,4).map(brandCardHtml).join('');
+}
+
+/* ---------------- search / discover ---------------- */
+function runSearch(q){
+  q = (q||'').trim();
+  document.getElementById('home-search').value = q;
+  document.getElementById('discover-search').value = q;
+  setSearchActive(false);
+  setTab('discover');
+  if(q){
+    state.recent = [q, ...state.recent.filter(r=>r.toLowerCase()!==q.toLowerCase())].slice(0,5);
+    localStorage.setItem('bs_recent', JSON.stringify(state.recent));
+  }
+  state.resultQuery = q;
+  doGeoSearch(q);
+}
+async function useMyLocation(){
+  setSearchActive(false);
+  setTab('discover');
+  toast('Finding your location…');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    state.userLoc = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+    document.getElementById('loc-status').textContent = '✓ Location access granted';
+    await doNearbySearch(state.userLoc);
+  }, err=>{
+    toast('Location access denied — try searching a city instead');
+  }, { enableHighAccuracy:true, timeout:8000 });
+}
+function requestLocationPermission(){
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.userLoc = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+    document.getElementById('loc-status').textContent = '✓ Location access granted';
+    toast('Location access granted');
+  }, err=>{
+    document.getElementById('loc-status').textContent = '✕ Location access denied';
+    toast('Location access denied');
+  });
+}
+function findRealLocations(brandName){
+  document.getElementById('discover-search').value = brandName;
+  setTab('discover');
+  state.resultQuery = brandName;
+  if(!state.apiKey){
+    showKeyRequiredResults(brandName);
+    return;
+  }
+  if(state.userLoc){ doNearbySearch(state.userLoc, brandName); }
+  else {
+    navigator.geolocation.getCurrentPosition(pos=>{
+      state.userLoc = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+      doNearbySearch(state.userLoc, brandName);
+    }, ()=> doGeoSearch(brandName));
+  }
+}
+function showKeyRequiredResults(query){
+  state.results = null;
+  renderDiscoverBody();
+  document.getElementById('discover-body').innerHTML = `
+    <div class="empty">
+      <div style="font-size:38px;">🔑</div>
+      <p>Connect a free Google Places API key to pull real, live results for "${escapeHtml(query)}".</p>
+      <button class="primary-btn" onclick="setTab('settings')">Go to Settings</button>
+    </div>`;
+}
+async function doGeoSearch(query){
+  if(!state.apiKey){ showKeyRequiredResults(query || 'boba shops'); return; }
+  document.getElementById('discover-body').innerHTML = `<div class="empty"><div style="font-size:34px;">🎯</div><p>Scanning the map for "${escapeHtml(query)}"…</p></div>`;
+  try{
+    await loadGoogleMaps(state.apiKey);
+    ensureServices();
+    let loc = state.userLoc;
+    if(query){
+      try{ loc = await geocodeAddress(query); }catch(e){ /* fall back to nearby search around known loc, or default */ }
+    }
+    if(!loc){ loc = { lat:37.7749, lng:-122.4194 }; } // default fallback: San Francisco
+    state.userLoc = state.userLoc || loc;
+    await doNearbySearch(loc, query && isNaN(query) ? null : null, query);
+  }catch(err){
+    document.getElementById('discover-body').innerHTML = `<div class="empty"><div style="font-size:34px;">⚠️</div><p>${escapeHtml(err.message)}</p><button class="primary-btn" onclick="setTab('settings')">Check API key</button></div>`;
+  }
+}
+async function doNearbySearch(loc, brandKeyword, cityQuery){
+  document.getElementById('discover-body').innerHTML = `<div class="empty"><div style="font-size:34px;">🎯</div><p>Scanning nearby for boba…</p></div>`;
+  try{
+    await loadGoogleMaps(state.apiKey);
+    ensureServices();
+    const keyword = brandKeyword ? brandKeyword + ' bubble tea' : 'bubble tea boba';
+    const results = await placesNearby(loc, keyword);
+    state.userLoc = loc;
+    state.results = results.map(placeToShop);
+    renderDiscoverBody();
+    if(state.discoverView==='map') initOrResizeMap();
+  }catch(err){
+    document.getElementById('discover-body').innerHTML = `<div class="empty"><div style="font-size:34px;">⚠️</div><p>${escapeHtml(err.message)}</p></div>`;
+  }
+}
+function placeToShop(p){
+  const loc = p.geometry && p.geometry.location ? { lat:p.geometry.location.lat(), lng:p.geometry.location.lng() } : null;
+  const dist = (state.userLoc && loc) ? haversine(state.userLoc, loc) : null;
+  return {
+    place_id:p.place_id, name:p.name, rating:p.rating||null, reviews:p.user_ratings_total||0,
+    price:p.price_level||null, address:p.vicinity||p.formatted_address||'', loc,
+    distance:dist, status:statusFromOpeningHours(p), emoji:'🧋',
+    gradient: BRANDS[Math.abs(hashCode(p.name))%BRANDS.length].gradient
+  };
+}
+function hashCode(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCodeAt(i); h|=0; } return Math.abs(h); }
+
+function setDiscoverView(v){
+  state.discoverView=v;
+  document.getElementById('tt-list').classList.toggle('active', v==='list');
+  document.getElementById('tt-map').classList.toggle('active', v==='map');
+  renderDiscoverBody();
+  if(v==='map') setTimeout(initOrResizeMap,50);
+}
+function renderFilterChips(){
+  const f = state.filters;
+  document.getElementById('filter-chips').innerHTML = `
+    <button class="chip ${f.openNow?'active':''}" onclick="toggleFilter('openNow')">Open Now</button>
+    <button class="chip ${f.sort==='rating'?'active':''}" onclick="setSort('rating')">Highest Rated</button>
+    <button class="chip ${f.sort==='distance'?'active':''}" onclick="setSort('distance')">Closest</button>
+    <button class="chip ${f.sort==='cheapest'?'active':''}" onclick="setSort('cheapest')">Cheapest</button>
+    <button class="chip ${f.premium?'active':''}" onclick="toggleFilter('premium')">Premium</button>
+    <button class="chip ${f.keyword==='milk tea'?'active':''}" onclick="setKeyword('milk tea')">Milk Tea</button>
+    <button class="chip ${f.keyword==='fruit tea'?'active':''}" onclick="setKeyword('fruit tea')">Fruit Tea</button>
+    <button class="chip ${f.keyword==='smoothie'?'active':''}" onclick="setKeyword('smoothie')">Smoothies</button>
+    <button class="chip ${f.keyword==='cheese foam'?'active':''}" onclick="setKeyword('cheese foam')">Cheese Foam</button>
+    <button class="chip ${f.keyword==='coffee'?'active':''}" onclick="setKeyword('coffee')">Coffee</button>`;
+}
+function toggleFilter(k){ state.filters[k]=!state.filters[k]; renderFilterChips(); renderDiscoverBody(); }
+function setSort(v){ state.filters.sort = state.filters.sort===v ? 'default' : v; renderFilterChips(); renderDiscoverBody(); }
+function setKeyword(k){
+  const newK = state.filters.keyword===k ? '' : k;
+  state.filters.keyword = newK;
+  renderFilterChips();
+  if(newK && state.userLoc){ doNearbySearch(state.userLoc, newK); }
+  else if(!newK && state.userLoc){ doNearbySearch(state.userLoc); }
+}
+function getFilteredResults(){
+  if(!state.results) return [];
+  let list=[...state.results];
+  if(state.filters.openNow) list = list.filter(s=>s.status!=='closed');
+  if(state.filters.premium) list = list.filter(s=>s.price===3||s.price===4);
+  if(state.filters.sort==='rating') list.sort((a,b)=>(b.rating||0)-(a.rating||0));
+  if(state.filters.sort==='distance') list.sort((a,b)=>(a.distance||9999)-(b.distance||9999));
+  if(state.filters.sort==='cheapest') list.sort((a,b)=>(a.price||2)-(b.price||2));
+  return list;
+}
+function shopCardHtml(s, delay){
+  const fav = !!state.favorites[s.place_id];
+  return `
+  <button class="shopcard" style="animation-delay:${delay}ms" onclick="openDetailByPlaceId('${s.place_id}')">
+    ${shopThumbHtml(s.emoji,s.gradient)}
+    <div class="shopcard-body">
+      <div class="shopcard-top">
+        <h3>${escapeHtml(s.name)}</h3>
+        <div class="heart-btn" onclick="event.stopPropagation(); toggleFavShop('${s.place_id}')">
+          ${fav ? '❤️' : '🤍'}
+        </div>
+      </div>
+      <div class="rating">⭐ ${s.rating ?? '—'} <span style="color:var(--muted); font-weight:600;">(${s.reviews})</span> <span style="color:var(--muted);">·</span> <span style="color:var(--muted); font-weight:700;">${priceStr(s.price)}</span></div>
+      <div class="addr">${escapeHtml(s.address)}</div>
+      <div class="metarow">
+        <div class="metaleft">
+          ${s.distance!=null ? `<span>📍 ${fmtDist(s.distance)}</span>` : ''}
+        </div>
+        ${statusPillHtml(s.status)}
+      </div>
+    </div>
+  </button>`;
+}
+function renderDiscoverBody(){
+  renderFilterChips();
+  const body = document.getElementById('discover-body');
+  if(state.discoverView==='map'){
+    body.innerHTML = `<div id="map-panel"><div id="gmap"></div><div id="map-preview-slot" class="map-preview"></div></div>`;
+    return;
+  }
+  if(!state.results){
+    body.innerHTML = `<div class="empty"><div style="font-size:38px;">🎯</div><p>Search a city, address, or shop to find your next boba.</p><button class="primary-btn" onclick="useMyLocation()">Show shops near me</button></div>`;
+    return;
+  }
+  const list = getFilteredResults();
+  if(list.length===0){
+    body.innerHTML = `<div class="empty"><div style="font-size:34px;">🧋</div><p>No shops match these filters — try clearing one.</p></div>`;
+    return;
+  }
+  body.innerHTML = `<p style="padding:0 20px; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px;">${list.length} shops found</p>
+    <div style="display:flex; flex-direction:column; gap:10px; padding:0 20px 24px;">
+      ${list.map((s,i)=>shopCardHtml(s,i*50)).join('')}
+    </div>`;
+}
+
+/* ---------------- favorites ---------------- */
+function toggleFavShop(placeId){
+  const s = (state.results||[]).find(r=>r.place_id===placeId) || state.detailPlace;
+  if(state.favorites[placeId]){
+    delete state.favorites[placeId];
+    toast('Removed from favorites');
+  } else {
+    state.favorites[placeId] = s;
+    toast('Added to favorites');
+  }
+  localStorage.setItem('bs_favorites', JSON.stringify(state.favorites));
+  renderDiscoverBody();
+  if(document.getElementById('detail-screen').style.display==='block') renderDetailActions();
+}
+function renderFavorites(){
+  const items = Object.values(state.favorites);
+  const el = document.getElementById('favorites-list');
+  if(items.length===0){
+    el.innerHTML = `<div class="empty"><div style="font-size:34px;">🤍</div><p>No favorites yet.<br/>Tap the heart on a shop to save it here.</p></div>`;
+    return;
+  }
+  el.innerHTML = items.map((s,i)=>shopCardHtml(s,i*50)).join('');
+}
+
+/* ---------------- random boba ---------------- */
+function fireRandomBoba(){
+  const overlay = document.getElementById('snipe-overlay');
+  overlay.style.display='flex';
+  setTimeout(()=>{
+    overlay.style.display='none';
+    if(state.results && state.results.length){
+      const pick = state.results[Math.floor(Math.random()*state.results.length)];
+      openDetailByPlaceId(pick.place_id);
+    } else {
+      const pick = BRANDS[Math.floor(Math.random()*BRANDS.length)];
+      findRealLocations(pick.name);
+    }
+  }, 950);
+}
+
+/* ---------------- shop detail ---------------- */
+async function openDetailByPlaceId(placeId){
+  const cached = (state.results||[]).find(r=>r.place_id===placeId) || state.favorites[placeId];
+  renderDetailSkeleton(cached);
+  document.getElementById('detail-screen').style.display='block';
+  document.getElementById('fab').style.display='none';
+  document.getElementById('tabbar').style.display='none';
+  try{
+    await loadGoogleMaps(state.apiKey);
+    ensureServices();
+    const details = await getPlaceDetails(placeId);
+    state.detailPlace = { ...cached, ...detailsToShop(details) };
+    renderDetailFull(state.detailPlace);
+  }catch(err){
+    if(cached){ state.detailPlace=cached; renderDetailFull(cached); }
+  }
+}
+function detailsToShop(p){
+  const loc = p.geometry && p.geometry.location ? { lat:p.geometry.location.lat(), lng:p.geometry.location.lng() } : null;
+  const dist = (state.userLoc && loc) ? haversine(state.userLoc, loc) : null;
+  return {
+    place_id:p.place_id, name:p.name, rating:p.rating||null, reviews:p.user_ratings_total||0,
+    price:p.price_level||null, address:p.formatted_address||p.vicinity||'', loc, distance:dist,
+    phone:p.formatted_phone_number||'', website:p.website||'',
+    status:statusFromOpeningHours(p),
+    hoursToday: (p.opening_hours && p.opening_hours.weekday_text) ? p.opening_hours.weekday_text : [],
+    reviewsList: (p.reviews||[]).slice(0,3).map(r=>({author:r.author_name, text:r.text, stars:r.rating})),
+    emoji:'🧋', gradient: BRANDS[Math.abs(hashCode(p.name))%BRANDS.length].gradient
+  };
+}
+function renderDetailSkeleton(s){
+  const el = document.getElementById('detail-screen');
+  const g = s ? s.gradient : ['#7C3AED','#4C1D95'];
+  el.innerHTML = `
+    <div class="detail-banner" style="background:linear-gradient(135deg,${g[0]},${g[1]})">
+      <div class="emoji-bg">🧋</div>
+      <button class="back" onclick="closeDetail()">←</button>
+      <button class="share" onclick="shareShop()">↗</button>
+      <div><h1>${s?escapeHtml(s.name):'Loading…'}</h1><div class="sub">Fetching real details…</div></div>
+    </div>
+    <div class="detail-card"><p>🎯 Scanning target details…</p></div>`;
+}
+function renderDetailFull(s){
+  const el = document.getElementById('detail-screen');
+  const fav = !!state.favorites[s.place_id];
+  el.innerHTML = `
+    <div class="detail-banner" style="background:linear-gradient(135deg,${s.gradient[0]},${s.gradient[1]})">
+      <div class="emoji-bg">🧋</div>
+      <button class="back" onclick="closeDetail()">←</button>
+      <button class="share" onclick="shareShop()">↗</button>
+      <div>
+        <h1>${escapeHtml(s.name)}</h1>
+        <div class="sub">⭐ ${s.rating ?? '—'} (${s.reviews||0}) ${statusPillHtml(s.status)}</div>
+      </div>
+    </div>
+    <div class="detail-card">
+      <div class="row">📍 ${escapeHtml(s.address||'Address unavailable')}</div>
+      <div class="row">
+        ${s.distance!=null?`<span>🧭 ${fmtDist(s.distance)}</span>`:''}
+        <span style="margin-left:12px; font-weight:800; color:var(--muted);">${priceStr(s.price)}</span>
+      </div>
+      ${s.phone?`<div class="row">📞 ${escapeHtml(s.phone)}</div>`:''}
+      ${s.hoursToday && s.hoursToday.length? `<div class="row" style="align-items:flex-start;">🕐 <span>${escapeHtml(s.hoursToday[new Date().getDay()===0?6:new Date().getDay()-1] || s.hoursToday[0])}</span></div>` : ''}
+    </div>
+    <div class="actions">
+      <div class="actionbtn" onclick="navigateShop()"><div class="ic filled">🧭</div><span>Navigate</span></div>
+      <div class="actionbtn" onclick="callShop()"><div class="ic">📞</div><span>Call</span></div>
+      <div class="actionbtn" onclick="websiteShop()"><div class="ic">🌐</div><span>Website</span></div>
+      <div class="actionbtn" id="fav-action" onclick="toggleFavShop('${s.place_id}')"><div class="ic">${fav?'❤️':'🤍'}</div><span>Favorite</span></div>
+    </div>
+    ${s.reviewsList && s.reviewsList.length ? `
+    <div class="detail-section">
+      <div class="sectitle" style="padding:0;">Reviews <span style="font-weight:600; text-transform:none; color:var(--muted);">(via Google)</span></div>
+      ${s.reviewsList.map(r=>`
+        <div class="review">
+          <div class="review-top"><span>${escapeHtml(r.author)}</span><span>⭐ ${r.stars}</span></div>
+          <p>${escapeHtml((r.text||'').slice(0,220))}${(r.text||'').length>220?'…':''}</p>
+        </div>`).join('')}
+    </div>` : `<div class="detail-section"><p style="font-size:12.5px; color:var(--muted); font-weight:600;">No reviews returned for this location yet.</p></div>`}
+    <div style="height:10px;"></div>`;
+}
+function closeDetail(){
+  document.getElementById('detail-screen').style.display='none';
+  document.getElementById('fab').style.display='flex';
+  document.getElementById('tabbar').style.display='flex';
+}
+function shareShop(){
+  const s = state.detailPlace;
+  const url = s && s.place_id ? `https://www.google.com/maps/place/?q=place_id:${s.place_id}` : location.href;
+  if(navigator.share){ navigator.share({ title: s?s.name:'Boba Sniper', url }); }
+  else { navigator.clipboard?.writeText(url); toast('Share link copied'); }
+}
+function navigateShop(){
+  const s = state.detailPlace;
+  if(!s) return;
+  const url = s.place_id
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.name)}&destination_place_id=${s.place_id}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name+' '+(s.address||''))}`;
+  window.open(url,'_blank');
+}
+function callShop(){
+  const s = state.detailPlace;
+  if(s && s.phone) window.open('tel:'+s.phone.replace(/[^+\\d]/g,''));
+  else toast('No phone number available for this shop');
+}
+function websiteShop(){
+  const s = state.detailPlace;
+  if(s && s.website) window.open(s.website,'_blank');
+  else toast('No website available for this shop');
+}
+
+/* ---------------- dark mode / units ---------------- */
+function toggleDark(){ setDark(!state.dark); }
+function setDark(v){
+  state.dark = v;
+  document.body.classList.toggle('dark', v);
+  document.getElementById('darkbtn').textContent = v ? '☀️' : '🌙';
+  document.getElementById('sw-light').classList.toggle('on', !v);
+  document.getElementById('sw-dark').classList.toggle('on', v);
+  localStorage.setItem('bs_dark', v?'1':'0');
+}
+function setUnits(u){
+  state.units = u;
+  localStorage.setItem('bs_units', u);
+  document.getElementById('unit-mi').classList.toggle('active', u==='mi');
+  document.getElementById('unit-km').classList.toggle('active', u==='km');
+  renderDiscoverBody();
+}
+function toggleNotifications(){
+  const sw = document.getElementById('sw-notif');
+  const turningOn = !sw.classList.contains('on');
+  if(turningOn && 'Notification' in window){
+    Notification.requestPermission().then(perm=>{
+      if(perm==='granted'){
+        sw.classList.add('on');
+        new Notification('Boba Sniper', { body:'Notifications enabled — we\\'ll ping you about new boba shops nearby.' });
+      } else { toast('Notification permission denied'); }
+    });
+  } else {
+    sw.classList.toggle('on', turningOn);
+  }
+}
+
+/* ---------------- Google Maps / Places integration ---------------- */
+function loadGoogleMaps(key){
+  return new Promise((resolve,reject)=>{
+    if(!key) return reject(new Error('No API key set. Add one in Settings.'));
+    if(window.google && window.google.maps && window.google.maps.places){ gmapsReady=true; return resolve(); }
+    if(window.__gmapsLoading){ window.__gmapsQueue.push({resolve,reject}); return; }
+    window.__gmapsLoading = true;
+    window.__gmapsQueue = [{resolve,reject}];
+    window.__gmapsCallback = ()=>{
+      gmapsReady=true;
+      window.__gmapsQueue.forEach(q=>q.resolve());
+      window.__gmapsQueue = [];
+    };
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=__gmapsCallback`;
+    s.onerror = ()=>{
+      window.__gmapsQueue.forEach(q=>q.reject(new Error('Failed to load Google Maps — check that your API key is valid and Maps JavaScript API + Places API are enabled.')));
+      window.__gmapsQueue = [];
+      window.__gmapsLoading = false;
+    };
+    document.head.appendChild(s);
+  });
+}
+function ensureServices(){
+  if(!placesService){
+    const dummy = document.createElement('div');
+    placesService = new google.maps.places.PlacesService(dummy);
+  }
+  if(!geocoder) geocoder = new google.maps.Geocoder();
+}
+function geocodeAddress(q){
+  return new Promise((resolve,reject)=>{
+    geocoder.geocode({ address:q }, (results,status)=>{
+      if(status==='OK' && results[0]){
+        resolve({ lat:results[0].geometry.location.lat(), lng:results[0].geometry.location.lng() });
+      } else reject(new Error('Could not find "'+q+'" — try a more specific city or address.'));
+    });
+  });
+}
+function placesNearby(loc, keyword){
+  return new Promise((resolve,reject)=>{
+    placesService.nearbySearch({
+      location: new google.maps.LatLng(loc.lat, loc.lng),
+      radius: 12000,
+      keyword: keyword || 'bubble tea boba'
+    }, (results,status)=>{
+      if(status===google.maps.places.PlacesServiceStatus.OK) resolve(results);
+      else if(status===google.maps.places.PlacesServiceStatus.ZERO_RESULTS) resolve([]);
+      else reject(new Error('Places search failed: '+status));
+    });
+  });
+}
+function getPlaceDetails(placeId){
+  return new Promise((resolve,reject)=>{
+    placesService.getDetails({
+      placeId,
+      fields:['name','formatted_phone_number','international_phone_number','website','opening_hours',
+        'reviews','photos','formatted_address','vicinity','rating','user_ratings_total','price_level','geometry','place_id']
+    }, (place,status)=>{
+      if(status===google.maps.places.PlacesServiceStatus.OK) resolve(place);
+      else reject(new Error('Could not load details: '+status));
+    });
+  });
+}
+
+/* ---------------- map panel (real Google Map) ---------------- */
+function initOrResizeMap(){
+  const container = document.getElementById('gmap');
+  if(!container) return;
+  if(!state.apiKey || !window.google || !window.google.maps){
+    container.parentElement.innerHTML = `<div class="map-fallback">🗺️<br/>Add a Google Maps API key in Settings to see a real live map with pins.</div>`;
+    return;
+  }
+  const center = state.userLoc || (state.results && state.results[0] && state.results[0].loc) || { lat:37.7749, lng:-122.4194 };
+  if(!map){
+    map = new google.maps.Map(container, { center, zoom:13, disableDefaultUI:true, zoomControl:true,
+      styles:[{ elementType:'geometry', stylers:[{color:'#f3ecfa'}] },{ elementType:'labels.text.fill', stylers:[{color:'#8a7a9d'}] },
+      { featureType:'poi', stylers:[{visibility:'off'}] }, { featureType:'road', elementType:'geometry', stylers:[{color:'#ffffff'}] },
+      { featureType:'water', elementType:'geometry', stylers:[{color:'#e4d7f7'}] }] });
+  } else {
+    map.setCenter(center);
+    google.maps.event.trigger(map,'resize');
+  }
+  markers.forEach(m=>m.setMap(null)); markers=[];
+  if(userMarker) userMarker.setMap(null);
+  if(state.userLoc){
+    userMarker = new google.maps.Marker({ position:state.userLoc, map,
+      icon:{ path:google.maps.SymbolPath.CIRCLE, scale:8, fillColor:'#7C3AED', fillOpacity:1, strokeColor:'#fff', strokeWeight:2 } });
+  }
+  (state.results||[]).forEach(s=>{
+    if(!s.loc) return;
+    const color = s.status==='open' ? '#10b981' : s.status==='closing' ? '#f59e0b' : '#f43f5e';
+    const marker = new google.maps.Marker({
+      position:s.loc, map,
+      icon:{ path:google.maps.SymbolPath.CIRCLE, scale:10, fillColor:color, fillOpacity:1, strokeColor:'#fff', strokeWeight:2 },
+      label:{ text:'🧋', fontSize:'11px' }
+    });
+    marker.addListener('click', ()=>showMapPreview(s));
+    markers.push(marker);
+  });
+}
+function showMapPreview(s){
+  const slot = document.getElementById('map-preview-slot');
+  if(!slot) return;
+  slot.innerHTML = `
+    <button class="shopcard" onclick="openDetailByPlaceId('${s.place_id}')">
+      ${shopThumbHtml(s.emoji,s.gradient,'sm')}
+      <div class="shopcard-body">
+        <h3>${escapeHtml(s.name)}</h3>
+        <div class="rating">⭐ ${s.rating ?? '—'} <span style="color:var(--muted); font-weight:600;">(${s.reviews})</span></div>
+        <div class="metarow"><div class="metaleft">${s.distance!=null?`<span>📍 ${fmtDist(s.distance)}</span>`:''}</div>${statusPillHtml(s.status)}</div>
+      </div>
+    </button>`;
+}
+
+/* ---------------- API key management ---------------- */
+function saveApiKey(){
+  const val = document.getElementById('api-key-input').value.trim();
+  if(!val){ toast('Enter a valid API key'); return; }
+  state.apiKey = val;
+  localStorage.setItem('bs_gmaps_key', val);
+  document.getElementById('api-status').textContent = 'Testing connection…';
+  document.getElementById('api-status').style.color = '#8a7a9d';
+  // reset any previous load attempt
+  gmapsReady=false; map=null; placesService=null; geocoder=null;
+  document.querySelectorAll('script[src*="maps.googleapis.com"]').forEach(s=>s.remove());
+  window.__gmapsLoading=false;
+  loadGoogleMaps(val).then(()=>{
+    document.getElementById('api-status').textContent = '✓ Connected — live search is now enabled';
+    document.getElementById('api-status').style.color = '#059669';
+    renderHomeNotice();
+    toast('Connected to Google Maps');
+  }).catch(err=>{
+    document.getElementById('api-status').textContent = '✕ '+err.message;
+    document.getElementById('api-status').style.color = '#e11d48';
+  });
+}
+
+/* ---------------- init ---------------- */
+function init(){
+  setDark(state.dark);
+  setUnits(state.units);
+  document.getElementById('api-key-input').value = state.apiKey;
+  if(state.apiKey){ document.getElementById('api-status').textContent = 'Saved key found — reconnecting…'; saveApiKey(); }
+  renderHome();
+  renderFilterChips();
+}
+init();
+</script>
+</body>
+</html>
